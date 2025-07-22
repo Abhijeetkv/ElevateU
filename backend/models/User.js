@@ -15,6 +15,10 @@ const userSchema = new mongoose.Schema(
             required: true,
             unique: true,
         },
+        imageUrl: {
+            type: String,
+            default: '',
+        },
         enrolledCourses: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Course',
