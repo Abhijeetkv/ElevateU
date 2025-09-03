@@ -1,4 +1,5 @@
 import logo from './logo.svg'
+import logodark from './logodark.svg'
 import logo_dark from './logo_dark.svg'
 import search_icon from './search_icon.svg'
 import cross_icon from './cross_icon.svg'
@@ -88,7 +89,8 @@ export const assets = {
     profile_img3,
     play_icon,
     blue_tick_icon,
-    lesson_icon
+    lesson_icon,
+    logodark,
 }
 
 export const dummyEducatorData = {
