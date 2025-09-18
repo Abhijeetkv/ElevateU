@@ -1,45 +1,54 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import { useParams } from 'react-router-dom'
-import { useState } from 'react'
-import { useContext } from 'react'
 import { AppContext } from '../../context/AppContext.jsx'
 import Loading from '../../components/student/Loading.jsx'
 
 const CourseDetails = () => {
-  const {id} = useParams();
+  const { id } = useParams()
+  const [courseData, setCourseData] = useState(null)
+  const { allCourses } = useContext(AppContext)
 
-  const [courseData, setCourseData] = useState(null);
-
-  const {allCourses} = useContext(AppContext)
-
-  const fetchCourseData = async () => {
-    const findCourse = allCourses.find(course => course._id === id);
-    setCourseData(findCourse);
+  const fetchCourseData = () => {
+    const findCourse = allCourses.find(course => course._id === id)
+    setCourseData(findCourse || null)
   }
 
   useEffect(() => {
-    fetchCourseData();
-  }, [])
+    if (allCourses && allCourses.length > 0) {
+      fetchCourseData()
+    }
+  }, [allCourses, id])
 
-  return courseData ? (
-    <>
-    <div className='flex md:flex-row flex-col-reverse gap-10 relative items-start justify-between md:px-36 px-8 md:pt-30 pt-20 text-left'>
-    
-      <div className='absolute top-0 left-0 w-full h-[500px] -z-1 bg-gradient-to-b from-cyan-100/70'></div>
+  if (!courseData && allCourses.length === 0) {
+    return <Loading />
+  }
 
-    {/* left column */}
-        <div>
-            <h1>{courseData.courseTitle}</h1>
-            <p dangerouslySetInnerHTML={{ __html: courseData.courseDescription.slice(0, 200) }}></p>
-        </div>
+  if (!courseData && allCourses.length > 0) {
+    return <p className="p-8">Course not found</p>
+  }
 
-        {/* right column */}
-        <div></div>
+  return (
+    <div className="flex md:flex-row flex-col-reverse gap-10 relative items-start justify-between md:px-36 px-8 md:pt-30 pt-20 text-left ">
+      <div className="absolute top-0 left-0  w-full h-[500px] z-1 bg-gradient-to-b from-cyan-100/70"></div>
 
+      {/* left column */}
+      <div className='max-w-xl z-10 text-gray-500'>
+        <h1 className='md:text-4xl text-2xl font-semibold text-gray-800'>{courseData.courseTitle}</h1>
+        <p className='pt-4 md:text-base text-sm'
+          dangerouslySetInnerHTML={{
+            __html: courseData.courseDescription.slice(0, 200)
+          }}
+        ></p>
+
+
+
+        {/* review and rating */}
+      </div>
+
+      {/* right column */}
+      <div></div>
     </div>
-    </>
-    
-  ) : <Loading />
+  )
 }
 
 export default CourseDetails
