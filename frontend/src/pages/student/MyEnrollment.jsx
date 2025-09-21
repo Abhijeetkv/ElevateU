@@ -2,6 +2,7 @@ import React from "react";
 import { useContext , useState} from "react";
 import  {AppContext}  from "../../context/AppContext";
 import {Line} from 'rc-progress';
+import Footer from "../../components/student/Footer";
 
 
 const MyEnrollment = () => {
@@ -64,6 +65,7 @@ const MyEnrollment = () => {
           </tbody>
         </table>
       </div>
+      <Footer />
     </>
   );
 };
