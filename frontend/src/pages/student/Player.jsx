@@ -4,6 +4,8 @@ import { useParams } from "react-router-dom";
 import { assets } from "../../assets/assets.js";
 import humanizeDuration from "humanize-duration";
 import YouTube from "react-youtube";
+import Footer from "../../components/student/Footer.jsx";
+import Rating from "../../components/student/Rating.jsx";
 
 const Player = () => {
   const { enrolledCourses, calculateChapterTime } = useContext(AppContext);
@@ -30,6 +32,9 @@ const Player = () => {
   useEffect(() => {
     getCourseData();
   }, [enrolledCourses]);
+
+
+  
 
   return (
     <>
@@ -84,7 +89,7 @@ const Player = () => {
                           <div className="flex items-center justify-between w-full text-gray-800 text-xs md:text-default">
                             <p>{lecture.lectureTitle}</p>
                             <div className="flex gap-2">
-                              {lecture.lectureUrl && (
+                              {lecture.lectureUrl && 
                                 <p
                                   onClick={() =>
                                     setPlayerData({
@@ -97,7 +102,7 @@ const Player = () => {
                                 >
                                   Watch
                                 </p>
-                              )}
+                              }
                               <p>
                                 {humanizeDuration(
                                   lecture.lectureDuration * 60 * 1000,
@@ -113,6 +118,12 @@ const Player = () => {
                 </div>
               ))}
           </div>
+
+              <div className="flex items-center gap-2 mt-10">
+                <h1 className="text-xl font-bold">Rate this course</h1>
+                <Rating initialRating={0}/>
+              </div>
+
         </div>
         {/* right column */}
         <div className="md:mt-10">
@@ -137,6 +148,7 @@ const Player = () => {
           )}
         </div>
       </div>
+      <Footer />
     </>
   );
 };
