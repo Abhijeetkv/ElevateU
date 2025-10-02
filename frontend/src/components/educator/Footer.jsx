@@ -17,7 +17,7 @@ const Footer = () => {
           className="py-4 text-center text-xs md:text-sm
         text-gray-500"
         >
-          Copyright 2025 © GreatStack. All Right Reserved.
+          Copyright 2025 © ElevateU. All Right Reserved.
         </p>
         <div className="flex items-center gap-3 max-md:mt-4">
             <a href="#">
