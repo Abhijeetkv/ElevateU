@@ -3,14 +3,21 @@ import cors from 'cors';
 import 'dotenv/config';
 import connectDB from './configs/mongodb.js';
 import { clerkWebhooks } from './controllers/webhooks.js';
+import educatorRouter from './routes/educatorRoutes.js';
+import { clerkMiddleware } from '@clerk/express';
+import connectCloudinary from './configs/cloudinary.js';
+
 
 const app = express();
 
 // Await the database connection initialization
 await connectDB();
+await connectCloudinary()
 
 // Global Middleware for CORS
 app.use(cors());
+
+app.use(clerkMiddleware())
 
 // Webhook Route (MUST come before the global express.json() middleware)
 // We use express.raw() to get the raw request body buffer for Svix signature verification.
@@ -18,6 +25,8 @@ app.post('/clerk', express.raw({ type: 'application/json' }), clerkWebhooks);
 
 // Global Middleware for all other routes that need parsed JSON bodies
 app.use(express.json());
+
+app.use('/api/educator', express.json(), educatorRouter)
 
 // Standard Health Check Route
 app.get('/', (req, res) => {
