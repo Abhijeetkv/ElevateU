@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema(
     {
+        // Using _id to store Clerk's external ID
         _id: {
             type: String,
             required: true,
@@ -19,6 +20,7 @@ const userSchema = new mongoose.Schema(
             type: String,
             default: '',
         },
+        // Reference to other models, e.g., 'Course'
         enrolledCourses: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Course',
