@@ -22,6 +22,93 @@ const AddCourse = () => {
     isPreviewFree: false,
   });
 
+  // --- Chapter Management Logic ---
+  const handleChapter = (action, chapterId) => {
+    if (action === "add") {
+      const title = prompt("Enter Chapter Name:");
+      if (title) {
+        const newChapter = {
+          chapterId: uniqid(),
+          chapterTitle: title,
+          chapterContent: [],
+          collapsed: false,
+          chapterOrder:
+            chapters.length > 0 ? chapters.slice(-1)[0].chapterOrder + 1 : 1,
+        };
+        setChapters([...chapters, newChapter]);
+      }
+    } else if (action === "remove") {
+      setChapters(
+        chapters.filter((chapter) => chapter.chapterId !== chapterId)
+      );
+    } else if (action === "toggle") {
+      setChapters(
+        chapters.map((chapter) =>
+          chapter.chapterId === chapterId
+            ? { ...chapter, collapsed: !chapter.collapsed }
+            : chapter
+        )
+      );
+    }
+  };
+
+  const addLecture = () => {
+    setChapters(
+      chapters.map((chapter) => {
+        if (chapter.chapterId === currentChapterId) {
+          const newLecture = {
+            ...lectureDetails,
+            lectureOrder:
+              chapter.chapterContent.length > 0
+                ? chapter.chapterContent.slice(-1)[0].lectureOrder + 1
+                : 1,
+            lectureId: uniqid(),
+          };
+          return {
+            ...chapter,
+            chapterContent: [...chapter.chapterContent, newLecture],
+          };
+        }
+        return chapter;
+      })
+    );
+
+    // ✅ Reset form after adding lecture
+    setShowPopup(false);
+    setLectureDetails({
+      lectureTitle: "",
+      lectureDuration: "",
+      lectureUrl: "",
+      isPreviewFree: false,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    // you can send data to backend here
+  };
+
+  const handleLecture = (action, chapterId, lectureIndex) => {
+    if (action === "add") {
+      setCurrentChapterId(chapterId);
+      setShowPopup(true);
+    } else if (action === "remove") {
+      setChapters(
+        chapters.map((chapter) => {
+          if (chapter.chapterId === chapterId) {
+            return {
+              ...chapter,
+              chapterContent: chapter.chapterContent.filter(
+                (_, index) => index !== lectureIndex
+              ),
+            };
+          }
+          return chapter;
+        })
+      );
+    }
+  };
+
   useEffect(() => {
     // initialize quill only once
     if (!quillRef.current && editorRef.current) {
@@ -34,7 +121,11 @@ const AddCourse = () => {
   return (
     <>
       <div className="h-screen overflow-scroll flex flex-col items-start justify-between md:p-8 md:pb-0 p-4 pt-8 pb-0">
-        <form className="flex flex-col gap-4 max-w-md w-full text-gray-500">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-4 max-w-md w-full text-gray-500"
+        >
+          {/* Course Title */}
           <div className="flex flex-col gap-1">
             <p>Course Title</p>
             <input
@@ -46,11 +137,14 @@ const AddCourse = () => {
               required
             />
           </div>
+
+          {/* Course Description */}
           <div className="flex flex-col gap-1">
             <p>Course Description</p>
             <div ref={editorRef}></div>
           </div>
 
+          {/* Price & Thumbnail */}
           <div className="flex items-center justify-between flex-wrap">
             <div className="flex flex-col gap-1">
               <p>Course Price</p>
@@ -91,6 +185,7 @@ const AddCourse = () => {
             </div>
           </div>
 
+          {/* Discount */}
           <div className="flex flex-col gap-1">
             <p>Discount %</p>
             <input
@@ -105,16 +200,17 @@ const AddCourse = () => {
             />
           </div>
 
-          {/* Adding Chapters & Lectures */}
+          {/* Chapters */}
           <div>
             {chapters.map((chapter, chapterIndex) => (
               <div
-                key={chapterIndex}
+                key={chapter.chapterId}
                 className="bg-white border rounded-lg mb-4"
               >
                 <div className="flex justify-between items-center p-4 border-b">
                   <div className="flex items-center">
                     <img
+                      onClick={() => handleChapter("toggle", chapter.chapterId)}
                       src={assets.dropdown_icon}
                       width={14}
                       alt=""
@@ -123,42 +219,56 @@ const AddCourse = () => {
                       }`}
                     />
                     <span className="font-semibold">
-                      {chapterIndex + 1}
-                      {chapter.chapterTitle}
+                      {chapterIndex + 1}. {chapter.chapterTitle}
                     </span>
                   </div>
                   <span className="text-gray-500">
                     {chapter.chapterContent.length} Lectures
                   </span>
-                  <img src={assets.cross_icon} alt="cursor-pointer" />
+                  <img
+                    onClick={() => handleChapter("remove", chapter.chapterId)}
+                    src={assets.cross_icon}
+                    alt="cursor-pointer"
+                  />
                 </div>
                 {!chapter.collapsed && (
                   <div className="p-4">
                     {chapter.chapterContent.map((lecture, lectureIndex) => (
                       <div
-                        key={lectureIndex}
+                        key={lecture.lectureId}
                         className="flex justify-between items-center mb-2"
                       >
                         <span>
-                          {lectureIndex + 1} {lecture.lectureTitle} -{" "}
+                          {lectureIndex + 1}. {lecture.lectureTitle} -{" "}
                           {lecture.lectureDuration} mins -{" "}
                           <a
                             href={lecture.lectureUrl}
                             target="_blank"
+                            rel="noreferrer"
                             className="text-blue-500"
                           >
                             Link
-                          </a>
+                          </a>{" "}
                           - {lecture.isPreviewFree ? "Free Preview" : "Paid"}
                         </span>
                         <img
                           src={assets.cross_icon}
                           alt=""
                           className="cursor-pointer"
+                          onClick={() =>
+                            handleLecture(
+                              "remove",
+                              chapter.chapterId,
+                              lectureIndex
+                            )
+                          }
                         />
                       </div>
                     ))}
-                    <div className="inline-flex bg-gray-100 p-2 rounded cursor-pointer mt-2">
+                    <div
+                      className="inline-flex bg-gray-100 p-2 rounded cursor-pointer mt-2"
+                      onClick={() => handleLecture("add", chapter.chapterId)}
+                    >
                       + Add Lecture
                     </div>
                   </div>
@@ -167,12 +277,16 @@ const AddCourse = () => {
             ))}
           </div>
 
-          <div className="flex justify-center items-center bg-blue-100 p-2 rounded-lg cursor-pointer">
+          <div
+            className="flex justify-center items-center bg-blue-100 p-2 rounded-lg cursor-pointer"
+            onClick={() => handleChapter("add")}
+          >
             + Add Chapter
           </div>
 
+          {/* Popup for adding lecture */}
           {showPopup && (
-            <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50">
+            <div className="fixed inset-0 flex items-center justify-center bg-black/10 backdrop-blur-sm">
               <div className="bg-white text-gray-700 p-4 rounded relative w-full max-w-80">
                 <h2 className="text-lg font-semibold mb-4">Add Lecture</h2>
 
@@ -237,6 +351,7 @@ const AddCourse = () => {
                 </div>
 
                 <button
+                  onClick={addLecture}
                   type="button"
                   className="w-full bg-blue-400 text-white px-4 py-2 rounded"
                 >
@@ -252,6 +367,13 @@ const AddCourse = () => {
               </div>
             </div>
           )}
+
+          <button
+            type="submit"
+            className="bg-black text-white w-max py-2.5 px-8 rounded my-4"
+          >
+            ADD
+          </button>
         </form>
       </div>
     </>
