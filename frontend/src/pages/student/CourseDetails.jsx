@@ -23,14 +23,14 @@ const CourseDetails = () => {
     calculateCourseDuration,
     calculateNoOfLectures,
     currency,
-    backendURL,
+    backendUrl,
     userData,
     getToken
   } = useContext(AppContext);
 
   const fetchCourseData = async () => {
     try {
-      const {data} = await axios.get(backendURL + '/api/courses/' + id);
+      const {data} = await axios.get(backendUrl + '/api/courses/' + id);
       if(data.success){
         setCourseData(data.courseData);
       }else{
@@ -51,7 +51,7 @@ const CourseDetails = () => {
       }
 
       const token = await getToken();
-      const {data} = await axios.post(backendURL + '/api/user/purchase', {courseId: courseData._id}, {headers: {Authorization: `Bearer ${token}`}});
+      const {data} = await axios.post(backendUrl + '/api/user/purchase', {courseId: courseData._id}, {headers: {Authorization: `Bearer ${token}`}});
       if(data.success){
         const {session_url} = data;
         window.location.replace(session_url);
