@@ -6,7 +6,7 @@ import User from "../models/User.js";
 
 export const updateRoleToEducator = async (req, res) => {
   try {
-    const userId = req.auth.userId;
+    const userId = req.auth().userId;
 
     await clerkClient.users.updateUserMetadata(userId, {
       publicMetadata: {
@@ -30,7 +30,7 @@ export const addCourse = async (req, res) => {
   try {
     const { courseData } = req.body;
     const imageFile = req.file;
-    const educatorId = req.auth.userId;
+    const educatorId = req.auth().userId;
 
     if (!imageFile) {
       return res.json({
@@ -61,7 +61,7 @@ export const addCourse = async (req, res) => {
 // Get educator courses
 export const getEducatorCourses = async (req, res) => {
   try {
-    const educatorId = req.auth.userId;
+    const educatorId = req.auth().userId;
     const courses = await Course.find({ educator: educatorId });
     res.json({
       success: true,
@@ -78,7 +78,7 @@ export const getEducatorCourses = async (req, res) => {
 // get educator dashboard data (Total Earning, Enrolled Students, No. of courses)
 export const getEducatorDashboardData = async (req, res) => {
   try {
-    const educatorId = req.auth.userId;
+    const educatorId = req.auth().userId;
     const courses = await Course.find({ educator: educatorId });
     const totalCourses = courses.length;
 
@@ -132,7 +132,7 @@ export const getEducatorDashboardData = async (req, res) => {
 //  Get Enrolled Students Data with Purchase Data
 export const getEnrolledStudentsData = async (req, res) => {
   try {
-    const educatorId = req.auth.userId;
+    const educatorId = req.auth().userId;
     const courses = await Course.find({ educator: educatorId });
     const courseIds = courses.map((course) => course._id);
 
