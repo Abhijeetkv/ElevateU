@@ -41,27 +41,52 @@ const CourseDetails = () => {
     }
   };
 
-  const enrollCourse = async () => {
-    try {
-      if(!userData){
-        return toast.warn('Login to enroll the course');
-      }
-      if(isAlreadyEnrolled){
-        return toast.warn('You are already enrolled in this course');
-      }
+  // CourseDetails.jsx
 
-      const token = await getToken();
-      const {data} = await axios.post(backendUrl + '/api/user/purchase', {courseId: courseData._id}, {headers: {Authorization: `Bearer ${token}`}});
-      if(data.success){
-        const {session_url} = data;
-        window.location.replace(session_url);
-      }else{
-        toast.error(data.message);
-      }
-    } catch (error) {
-      toast.error(error.message);
+const enrollCourse = async () => {
+  try {
+    // 1. Attempt to get the token first. This is a reliable way 
+    // to check for an active Clerk session.
+    const token = await getToken();
+    
+    // 2. If no token is available, the user is definitely not logged in.
+    if (!token) {
+      return toast.warn('Login to enroll the course');
     }
+
+    // Now, we know the user has a valid session token. 
+    // The issue might be that courseData is not yet fetched or userData is null 
+    // even with a token, but the enrollment check needs courseData.
+
+    if (!courseData) {
+        return toast.error('Course data not loaded. Please try again.');
+    }
+
+    // 3. Check for enrollment status (only possible after courseData and userData are available)
+    // The useEffect hook should handle setting isAlreadyEnrolled, but a safe check is wise.
+    if(isAlreadyEnrolled){
+      return toast.warn('You are already enrolled in this course');
+    }
+
+    // The backend's `requireAuth()` will provide a final, definitive check.
+    const {data} = await axios.post(
+      backendUrl + '/api/user/purchase', 
+      {courseId: courseData._id}, 
+      {headers: {Authorization: `Bearer ${token}`}}
+    );
+
+    if(data.success){
+      const {session_url} = data;
+      window.location.replace(session_url);
+    } else {
+      // This will catch backend errors, including unauthorized or missing course data
+      toast.error(data.message);
+    }
+  } catch (error) {
+    // This catches network errors or issues with getToken
+    toast.error(error.message || 'An error occurred during enrollment.');
   }
+}
 
   useEffect(() => {
       fetchCourseData();
@@ -96,11 +121,11 @@ const CourseDetails = () => {
     }
   };
 
-  if (!courseData && allCourses.length === 0) {
+  if (!courseData && allCourses.length > 0) {
     return <Loading />;
   }
 
-  if (!courseData && allCourses.length > 0) {
+  if (!courseData && allCourses.length === 0) {
     return <p className="p-8">Course not found</p>;
   }
 
