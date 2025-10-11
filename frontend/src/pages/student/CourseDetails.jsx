@@ -30,7 +30,7 @@ const CourseDetails = () => {
 
   const fetchCourseData = async () => {
     try {
-      const {data} = await axios.get(backendUrl + '/api/courses/' + id);
+      const {data} = await axios.get(backendUrl + '/api/course/' + id);
       if(data.success){
         setCourseData(data.courseData);
       }else{
@@ -67,11 +67,12 @@ const CourseDetails = () => {
       fetchCourseData();
   }, []);
 
-  useEffect(() => {
-      if(userData && courseData){
-        setIsAlreadyEnrolled(userData.enrollCourses.includes(courseData._id));
-      }
-  }, [userData, courseData]);
+   useEffect(() => {
+      // ✅ FIX: Check that userData, courseData, AND userData.enrolledCourses all exist.
+      if(userData && courseData && Array.isArray(userData.enrolledCourses)){
+        setIsAlreadyEnrolled(userData.enrolledCourses.includes(courseData._id));
+      }
+  }, [userData, courseData]);
 
   const toggleSection = (index) => {
     setOpenSection((prev) => ({
