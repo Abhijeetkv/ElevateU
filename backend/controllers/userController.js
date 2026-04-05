@@ -19,6 +19,14 @@ export const getUserData = async (req, res) => {
                 message: 'User not found'
             })
         }
+
+        // Auto-fix users with "null null" name
+        if (!user.name || user.name === 'null null' || user.name.trim() === '') {
+            const email = user.email || '';
+            user.name = email.split('@')[0] || 'User';
+            await user.save();
+        }
+
         res.json({
             success: true,
             user

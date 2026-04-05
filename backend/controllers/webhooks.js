@@ -24,9 +24,12 @@ export const clerkWebhooks = async (req, res) => {
 
     switch (type) {
       case "user.created": {
+        const firstName = data.first_name || '';
+        const lastName = data.last_name || '';
+        const fullName = (firstName + ' ' + lastName).trim() || data.email_addresses[0].email_address.split('@')[0] || 'User';
         const userData = {
           _id: data.id,
-          name: data.first_name + " " + data.last_name,
+          name: fullName,
           email: data.email_addresses[0].email_address,
           imageUrl: data.image_url || "",
         };
@@ -37,8 +40,11 @@ export const clerkWebhooks = async (req, res) => {
       }
 
       case "user.updated": {
+        const firstName = data.first_name || '';
+        const lastName = data.last_name || '';
+        const fullName = (firstName + ' ' + lastName).trim() || data.email_addresses[0].email_address.split('@')[0] || 'User';
         const userData = {
-          name: data.first_name + " " + data.last_name,
+          name: fullName,
           email: data.email_addresses[0].email_address,
           imageUrl: data.image_url || "",
         };
