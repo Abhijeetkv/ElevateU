@@ -26,8 +26,8 @@ export const clerkWebhooks = async (req, res) => {
       case "user.created": {
         const userData = {
           _id: data.id,
-          name: data.first_name + " " + data.last_name, // Clerk provides first_name/last_name
-          email: data.email_addresses[0].email_address, // Clerk provides email_addresses array
+          name: data.first_name + " " + data.last_name,
+          email: data.email_addresses[0].email_address,
           imageUrl: data.image_url || "",
         };
         await User.create(userData);
@@ -38,8 +38,8 @@ export const clerkWebhooks = async (req, res) => {
 
       case "user.updated": {
         const userData = {
-          name: data.first_name + " " + data.last_name, // Clerk provides first_name/last_name
-          email: data.email_addresses[0].email_address, // Clerk provides email_addresses array
+          name: data.first_name + " " + data.last_name,
+          email: data.email_addresses[0].email_address,
           imageUrl: data.image_url || "",
         };
         await User.findByIdAndUpdate(data.id, userData);
@@ -49,7 +49,6 @@ export const clerkWebhooks = async (req, res) => {
       }
 
       case "user.deleted": {
-        // When a user is deleted, Clerk provides the user ID in the data object
         await User.findByIdAndDelete(data.id);
         console.log(`User deleted: ${data.id}`);
         res.status(200).json({});
@@ -58,12 +57,11 @@ export const clerkWebhooks = async (req, res) => {
 
       default:
         console.log(`Unhandled webhook event type: ${type}`);
-        res.status(200).json({}); // Always respond 200 for unhandled events
+        res.status(200).json({});
         break;
     }
   } catch (error) {
     console.error("Webhook processing error:", error.message);
-    // Respond with 400 or 401 if verification fails or an internal error occurs
     res.status(401).json({
       success: false,
       message:
@@ -75,16 +73,17 @@ export const clerkWebhooks = async (req, res) => {
 const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const stripeWebhooks = async (req, res) => {
-  const signature = request.headers["stripe-signature"];
+  const signature = req.headers["stripe-signature"];
+  let event;
   try {
-    event = Stripe.webhooks.constructEvent(
-      request.body,
+    event = stripeInstance.webhooks.constructEvent(
+      req.body,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (err) {
     console.log(`⚠️ Webhook signature verification failed.`, err.message);
-    return response.sendStatus(400);
+    return res.sendStatus(400);
   }
 
   // Handle the event
@@ -103,7 +102,7 @@ export const stripeWebhooks = async (req, res) => {
         const userData = await User.findById(purchaseData.userId)
         const courseData = await Course.findById(purchaseData.courseId.toString())
 
-        courseData.enrolledStudents.push(userData)
+        courseData.enrolledStudents.push(userData._id)
         await courseData.save()
 
         userData.enrolledCourses.push(courseData._id)
@@ -134,5 +133,5 @@ export const stripeWebhooks = async (req, res) => {
       console.log(`Unhandled event type ${event.type}`);
   }
 
-  response.json({ received: true });
+  res.json({ received: true });
 };

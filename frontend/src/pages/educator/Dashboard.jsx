@@ -7,13 +7,13 @@ import axios from "axios";
 
 
 const Dashboard = () => {
-  const { currency, isEducator, getToken, BackendUrl } = useContext(AppContext);
+  const { currency, isEducator, getToken, backendUrl } = useContext(AppContext);
   const [dashboardData, setDashboardData] = useState(null);
 
   const fetchDashboardData = async () => {
     try {
       const token = await getToken()
-      const {data} = await axios.get(BackendUrl + '/api/educator/dashboard', {headers: {Authorization: `Bearer ${token}`}})
+      const {data} = await axios.get(backendUrl + '/api/educator/dashboard', {headers: {Authorization: `Bearer ${token}`}})
       if(data.success){
         setDashboardData(data.dashboardData);
       }else{

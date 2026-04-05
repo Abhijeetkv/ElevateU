@@ -1,7 +1,7 @@
 import { createContext , useEffect, useState} from "react";
 import { dummyCourses } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
-import humnanizeDuration from 'humanize-duration';
+import humanizeDuration from 'humanize-duration';
 import { useAuth, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -42,7 +42,7 @@ export const AppContextProvider = (props) => {
     // fetch userData
     const fetchUserData = async () => {
 
-        if(user.publicMetadata.role === 'educator'){
+        if(user.publicMetadata && user.publicMetadata.role === 'educator'){
             setIsEducator(true)
         }
         try {
@@ -77,7 +77,7 @@ export const AppContextProvider = (props) => {
     const calculateChapterTime = (chapter) => {
         let time = 0 ;
         chapter.chapterContent.map((lecture) => time += lecture.lectureDuration)
-        return humnanizeDuration(time * 60 * 1000, { units: ['h', 'm'] });
+        return humanizeDuration(time * 60 * 1000, { units: ['h', 'm'] });
     }
 
     //function to calculate course duration
@@ -85,7 +85,7 @@ export const AppContextProvider = (props) => {
         let time = 0 ;
 
         course.courseContent.map((chapter) => chapter.chapterContent.map((lecture) => time += lecture.lectureDuration))
-        return humnanizeDuration(time * 60 * 1000, { units: ['h', 'm'] });
+        return humanizeDuration(time * 60 * 1000, { units: ['h', 'm'] });
     }
 
     //function to calculate no. of lectures in course

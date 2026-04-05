@@ -176,7 +176,7 @@ const enrollCourse = async () => {
 
           <p className="text-sm">
             Course by{" "}
-            <span className="text-blue-600 underline">{courseData.educator.name}</span>
+            <span className="text-blue-600 underline">{courseData.educator && typeof courseData.educator === 'object' ? courseData.educator.name : 'Instructor'}</span>
           </p>
 
           <div className="pt-8 text-gray-800">

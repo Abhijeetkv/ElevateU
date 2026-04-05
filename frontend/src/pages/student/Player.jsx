@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { AppContext } from "../../context/AppContext";
-import { data, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { assets } from "../../assets/assets.js";
 import humanizeDuration from "humanize-duration";
 import YouTube from "react-youtube";
@@ -12,7 +12,7 @@ import Loading from "../../components/student/Loading.jsx"
 
 const Player = () => {
   const { enrolledCourses, calculateChapterTime, backendUrl, getToken, userData, fetchUserEnrolledCourses } = useContext(AppContext);
-  const { courseId } = useParams();
+  const { id } = useParams();
   const [courseData, setCourseData] = useState(null);
   const [openSection, setOpenSection] = useState({});
   const [playerData, setPlayerData] = useState(null);
@@ -21,7 +21,7 @@ const Player = () => {
 
   const getCourseData = () => {
     enrolledCourses.map((course) => {
-      if (course._id === courseId) {
+      if (course._id === id) {
         setCourseData(course);
         course.courseRatings.map((item) => {
           if(item.userId === userData._id){
@@ -49,7 +49,7 @@ const Player = () => {
   const markLectureAsCompleted = async (lectureId)=> {
     try {
       const token = await getToken()
-      const {data} = await axios.post(backendUrl + '/api/user/update-course-progress', {courseId, lectureId}, {headers: {Authorization: `Bearer ${token}`}})
+      const {data} = await axios.post(backendUrl + '/api/user/update-course-progress', {courseId: id, lectureId}, {headers: {Authorization: `Bearer ${token}`}})
       if(data.success){
         toast.success(data.message);
         getCourseProgress();
@@ -64,7 +64,10 @@ const Player = () => {
   const getCourseProgress = async () => {
     try {
       const token = await getToken()
-      const {data} = await axios.get(backendUrl + '/api/user/get-course-progress' + {courseId}, {headers: {Authorization: `Bearer ${token}`}})
+      const {data} = await axios.get(backendUrl + '/api/user/get-course-progress', {
+        params: { courseId: id },
+        headers: {Authorization: `Bearer ${token}`}
+      })
       if(data.success){
         setProgressData(data.progressData);
       }else{
@@ -78,7 +81,7 @@ const Player = () => {
   const handleRate = async (rating) => {
     try {
       const token = await getToken()
-      const {data} = await axios.post(backendUrl + '/api/user/add-rating', {courseId, rating}, {headers: {Authorization: `Bearer ${token}`}})
+      const {data} = await axios.post(backendUrl + '/api/user/add-rating', {courseId: id, rating}, {headers: {Authorization: `Bearer ${token}`}})
       if(data.success){
         toast.success(data.message);
         fetchUserEnrolledCourses();
@@ -202,7 +205,7 @@ const Player = () => {
               </div>
             </div>
           ) : (
-            <img src={courseData ? courseData.thumbnail : ""} alt="" />
+            <img src={courseData ? courseData.courseThumbnail : ""} alt="" />
           )}
         </div>
       </div>

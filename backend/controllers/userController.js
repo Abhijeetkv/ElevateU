@@ -4,6 +4,8 @@ import Purchase from "../models/Purchase.js";
 import Stripe from "stripe";
 import CourseProgress from "../models/CourseProgress.js";
 
+const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
+
 
 // Get user data
 export const getUserData = async (req, res) => {
@@ -75,9 +77,6 @@ export const purchaseCourse = async (req, res) => {
 
         const newPurchase = await Purchase.create(purchaseData)
 
-        // Stripe gateway Initialize
-        const stripeInstance = new Stripe(process.env.STRIPE_SECRET_KEY);
-
         const currency = process.env.CURRENCY.toLowerCase();
 
         // creating line items for stripe
@@ -111,6 +110,80 @@ export const purchaseCourse = async (req, res) => {
             success: false,
             message: error.message
         })
+    }
+}
+
+// Verify payment and enroll user after Stripe redirect
+export const verifyPayment = async (req, res) => {
+    try {
+        const userId = req.auth.userId;
+
+        // Find the most recent pending purchase for this user
+        const purchaseData = await Purchase.findOne({ userId, status: 'pending' }).sort({ createdAt: -1 });
+
+        if (!purchaseData) {
+            return res.json({
+                success: false,
+                message: 'No pending purchase found'
+            });
+        }
+
+        // Check if user is already enrolled (idempotency)
+        const userData = await User.findById(userId);
+        if (userData.enrolledCourses.includes(purchaseData.courseId.toString())) {
+            // Already enrolled, just mark purchase completed if needed
+            if (purchaseData.status === 'pending') {
+                purchaseData.status = 'completed';
+                await purchaseData.save();
+            }
+            return res.json({
+                success: true,
+                message: 'Already enrolled'
+            });
+        }
+
+        // List checkout sessions associated with this purchase
+        const sessions = await stripeInstance.checkout.sessions.list({
+            limit: 10,
+        });
+
+        // Find the session matching this purchase
+        const matchedSession = sessions.data.find(
+            s => s.metadata && s.metadata.purchaseId === purchaseData._id.toString()
+        );
+
+        if (!matchedSession || matchedSession.payment_status !== 'paid') {
+            return res.json({
+                success: false,
+                message: 'Payment not completed yet'
+            });
+        }
+
+        // Payment confirmed — enroll the user
+        const courseData = await Course.findById(purchaseData.courseId);
+
+        if (!courseData.enrolledStudents.includes(userId)) {
+            courseData.enrolledStudents.push(userId);
+            await courseData.save();
+        }
+
+        if (!userData.enrolledCourses.includes(courseData._id.toString())) {
+            userData.enrolledCourses.push(courseData._id);
+            await userData.save();
+        }
+
+        purchaseData.status = 'completed';
+        await purchaseData.save();
+
+        res.json({
+            success: true,
+            message: 'Payment verified and enrollment completed'
+        });
+    } catch (error) {
+        res.json({
+            success: false,
+            message: error.message
+        });
     }
 }
 
@@ -155,7 +228,7 @@ export const updateUserCourseProgress = async (req, res) => {
 export const getUserCourseProgress = async (req, res) => {
     try {
         const userId = req.auth.userId;
-        const {courseId} = req.body;
+        const {courseId} = req.query;
         const progressData = await CourseProgress.findOne({userId, courseId})
         res.json({
             success: true,
