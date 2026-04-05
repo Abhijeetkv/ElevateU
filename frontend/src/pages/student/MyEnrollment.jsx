@@ -4,6 +4,7 @@ import  {AppContext}  from "../../context/AppContext";
 import {Line} from 'rc-progress';
 import Footer from "../../components/student/Footer";
 import { toast } from "react-toastify";
+import axios from "axios";
 
 
 const MyEnrollment = () => {
@@ -12,7 +13,7 @@ const MyEnrollment = () => {
      calculateCourseDuration,
       navigate,
       userData,
-      fetchUserEnrollCourses,
+      fetchUserEnrolledCourses,
       backendUrl,
       getToken,
       calculateNoOfLectures
@@ -24,7 +25,10 @@ const MyEnrollment = () => {
     try {
       const token = await getToken();
       const tempProgressArray = await Promise.all(enrolledCourses.map(async(course) => {
-        const {data} = await axios.get(backendUrl + `/api/user/get-course-progress`,{courseId: course._id} ,{headers: {Authorization: `Bearer ${token}`}})
+        const {data} = await axios.get(backendUrl + `/api/user/get-course-progress`, {
+          params: { courseId: course._id },
+          headers: {Authorization: `Bearer ${token}`}
+        })
 
         let totalLectures = calculateNoOfLectures(course);
       const lectureCompleted = data.progressData ? data.progressData.lectureCompleted.length : 0;
@@ -39,7 +43,7 @@ const MyEnrollment = () => {
 
   useEffect(() => {
     if(userData){
-      fetchUserEnrollCourses();
+      fetchUserEnrolledCourses();
     }
   }, [userData])
 

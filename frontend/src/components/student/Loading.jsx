@@ -1,19 +1,38 @@
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { AppContext } from '../../context/AppContext';
+import axios from 'axios';
 
 const Loading = () => {
 
-  const {path} = useParams()
-  const navigate = useNavigate()
+  const { path } = useParams();
+  const navigate = useNavigate();
+  const { backendUrl, getToken, fetchUserEnrolledCourses } = useContext(AppContext);
 
   useEffect(() => {
-    if(path){
-      const timer = setTimeout(() => {
+    const verifyAndRedirect = async () => {
+      if (path) {
+        try {
+          // Call verify-payment to ensure enrollment is recorded
+          const token = await getToken();
+          if (token) {
+            await axios.get(backendUrl + '/api/user/verify-payment', {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            // Refresh enrolled courses after verification
+            await fetchUserEnrolledCourses();
+          }
+        } catch (error) {
+          console.error('Payment verification error:', error.message);
+        }
+        // Navigate to the target page
         navigate(`/${path}`);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [path, navigate]);
+      }
+    };
+
+    verifyAndRedirect();
+  }, [path]);
+
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div
