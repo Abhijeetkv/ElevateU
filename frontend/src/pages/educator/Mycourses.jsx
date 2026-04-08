@@ -33,16 +33,16 @@ const Mycourses = () => {
       <div className="h-screen flex flex-col items-start justify-between md:p-8 md:pb-0 p-4 pt-8 pb-0">
         <div className="w-full">
           <h2 className="pb-4 text-lg font-medium">My Courses</h2>
-          <div className="flex flex-col items-center max-w-4xl w-full overflow-hidden rounded-md bg-white border border-gray-500/20">
+          <div className="flex flex-col items-start max-w-4xl w-full overflow-hidden rounded-md bg-white border border-gray-500/20">
             <table className="text-gray-900 border-b border-gray-500/20 text-sm text-left">
               <thead className="text-gray-900 border-b border-gray-500/20 text-sm text-left">
                 <tr>
                   <th className="px-4 py-3 font-semibold truncate">
                     All Courses
                   </th>
-                  <th className="px-4 py-3 font-semibold truncate">Earnings</th>
-                  <th className="px-4 py-3 font-semibold truncate">Students</th>
-                  <th className="px-4 py-3 font-semibold truncate">
+                  <th className="px-10 py-3 font-semibold truncate">Earnings</th>
+                  <th className="px-10 py-3 font-semibold truncate">Students</th>
+                  <th className="px-10 py-3 font-semibold truncate">
                     Published On
                   </th>
                 </tr>
@@ -60,7 +60,7 @@ const Mycourses = () => {
                         {course.courseTitle}
                       </span>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-10 py-3">
                       {currency}{" "}
                       {Math.floor(
                         course.enrolledStudents.length *
@@ -68,10 +68,10 @@ const Mycourses = () => {
                             (course.discount * course.coursePrice) / 100)
                       )}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-10 py-3">
                       {course.enrolledStudents.length}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-10 py-3">
                       {new Date(course.createdAt).toLocaleDateString()}
                     </td>
                   </tr>
