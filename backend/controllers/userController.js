@@ -126,39 +126,45 @@ export const verifyPayment = async (req, res) => {
     try {
         const userId = req.auth.userId;
 
-        // Find the most recent pending purchase for this user
-        const purchaseData = await Purchase.findOne({ userId, status: 'pending' }).sort({ createdAt: -1 });
+        // Find the most recent purchase for this user (pending OR completed)
+        const purchaseData = await Purchase.findOne({ userId }).sort({ createdAt: -1 });
 
         if (!purchaseData) {
             return res.json({
                 success: false,
-                message: 'No pending purchase found'
+                message: 'No purchase found'
             });
         }
 
-        // Check if user is already enrolled (idempotency)
-        const userData = await User.findById(userId);
-        if (userData.enrolledCourses.includes(purchaseData.courseId.toString())) {
-            // Already enrolled, just mark purchase completed if needed
-            if (purchaseData.status === 'pending') {
-                purchaseData.status = 'completed';
-                await purchaseData.save();
+        // If webhook already processed this purchase, just ensure enrollment state is correct
+        if (purchaseData.status === 'completed') {
+            const userData = await User.findById(userId);
+            const courseIdStr = purchaseData.courseId.toString();
+            const alreadyEnrolled = userData.enrolledCourses.some(
+                (id) => id.toString() === courseIdStr
+            );
+
+            if (!alreadyEnrolled) {
+                // Webhook marked completed but enrollment wasn't saved — fix it
+                userData.enrolledCourses.push(purchaseData.courseId);
+                await userData.save();
             }
+
             return res.json({
                 success: true,
                 message: 'Already enrolled'
             });
         }
 
-        // List checkout sessions associated with this purchase
-        const sessions = await stripeInstance.checkout.sessions.list({
-            limit: 10,
-        });
-
-        // Find the session matching this purchase
-        const matchedSession = sessions.data.find(
-            s => s.metadata && s.metadata.purchaseId === purchaseData._id.toString()
-        );
+        // Purchase is still pending — check Stripe for payment status
+        // Use autopagination to search all sessions for this purchase
+        let matchedSession = null;
+        for await (const session of stripeInstance.checkout.sessions.list({ limit: 100 })) {
+            if (session.metadata && session.metadata.purchaseId === purchaseData._id.toString()) {
+                matchedSession = session;
+                break;
+            }
+        }
 
         if (!matchedSession || matchedSession.payment_status !== 'paid') {
             return res.json({
@@ -168,14 +174,23 @@ export const verifyPayment = async (req, res) => {
         }
 
         // Payment confirmed — enroll the user
+        const userData = await User.findById(userId);
         const courseData = await Course.findById(purchaseData.courseId);
+
+        if (!courseData) {
+            return res.json({ success: false, message: 'Course not found' });
+        }
 
         if (!courseData.enrolledStudents.includes(userId)) {
             courseData.enrolledStudents.push(userId);
             await courseData.save();
         }
 
-        if (!userData.enrolledCourses.includes(courseData._id.toString())) {
+        const courseIdStr = courseData._id.toString();
+        const alreadyEnrolled = userData.enrolledCourses.some(
+            (id) => id.toString() === courseIdStr
+        );
+        if (!alreadyEnrolled) {
             userData.enrolledCourses.push(courseData._id);
             await userData.save();
         }
@@ -183,11 +198,14 @@ export const verifyPayment = async (req, res) => {
         purchaseData.status = 'completed';
         await purchaseData.save();
 
+        console.log(`✅ Payment verified & enrolled user ${userId} in course ${courseData._id}`);
+
         res.json({
             success: true,
             message: 'Payment verified and enrollment completed'
         });
     } catch (error) {
+        console.error('verifyPayment error:', error.message);
         res.json({
             success: false,
             message: error.message
