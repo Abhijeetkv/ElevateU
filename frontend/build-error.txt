@@ -1,0 +1,61 @@
+﻿[36mvite v7.1.9 [32mbuilding for production...[36m[39m
+transforming...
+[32mΓ£ô[39m 1001 modules transformed.
+node.exe : [31mΓ£ù[39m Build 
+failed in 1.95s
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Users\abhij\AppData\Roaming\ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpe 
+   cified: ([31mΓ£ù[39m Build fai  
+  led in 1.95s:String) [], RemoteE   
+ xception
+    + FullyQualifiedErrorId : Native 
+   CommandError
+ 
+[31merror during build:
+[31mCannot add property 0, object 
+is not extensible[31m
+    at Array.push (<anonymous>)
+    at ConditionalExpression.getLiter
+alValueAtPath (file:///D:/ElevateU/fr
+ontend/node_modules/rollup/dist/es/sh
+ared/node-entry.js:12270:45)
+    at file:///D:/ElevateU/frontend/n
+ode_modules/rollup/dist/es/shared/nod
+e-entry.js:5064:30
+    at EntityPathTracker.withTrackedE
+ntityAtPath (file:///D:/ElevateU/fron
+tend/node_modules/rollup/dist/es/shar
+ed/node-entry.js:2014:24)
+    at 
+LocalVariable.getLiteralValueAtPath (
+file:///D:/ElevateU/frontend/node_mod
+ules/rollup/dist/es/shared/node-entry
+.js:5062:33)
+    at 
+Identifier.getLiteralValueAtPath (fil
+e:///D:/ElevateU/frontend/node_module
+s/rollup/dist/es/shared/node-entry.js
+:5207:48)
+    at 
+ObjectExpression.getObjectEntity (fil
+e:///D:/ElevateU/frontend/node_module
+s/rollup/dist/es/shared/node-entry.js
+:14262:47)
+    at 
+ObjectExpression.deoptimizePath (file
+:///D:/ElevateU/frontend/node_modules
+/rollup/dist/es/shared/node-entry.js:
+14201:14)
+    at CallExpression.deoptimizePath 
+(file:///D:/ElevateU/frontend/node_mo
+dules/rollup/dist/es/shared/node-entr
+y.js:11929:30)
+    at Property.deoptimizePath (file:
+///D:/ElevateU/frontend/node_modules/
+rollup/dist/es/shared/node-entry.js:5
+667:36)[39m
