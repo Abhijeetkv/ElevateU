@@ -4,11 +4,11 @@ import { assets } from '../../assets/assets'
 const Footer = () => {
   return (
     <>
-    <footer className='bg-gray-900 md:px-36 text-left w-full mt-10'>
+    <footer className='bg-gray-900 md:px-36 text-left w-full mt-52'>
         <div className='flex flex-col md:flex-row items-start px-8 md:px-0 justify-center gap-10 md:gap-32 py-10 border-b border-white/30'>
             <div className='flex flex-col md:items-start items-center w-full'>
                 <img src={assets.logodark} alt="logo" className='w-52' />
-                <p className='mt-4  text-center md:text-left text-sm text-white/80'>Lorem ipsum dolor sit amet consectetur, adipisicing elit. </p>
+                <p className='mt-4  text-center md:text-left text-sm text-white/80'>Empowering learners and educators through a seamless online learning experience.</p>
             </div>
             <div className='flex flex-col md:items-start items-center w-full'>
                 <h2 className='text-white font-semibold mb-5'>Company</h2>
