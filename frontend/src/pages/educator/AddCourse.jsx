@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import Quill from "quill";
-import uniqid from "uniqid";
+import { v4 as uuidv4 } from "uuid";
 import { assets } from "../../assets/assets";
 import { AppContext } from "../../context/AppContext";
 import { toast } from "react-toastify";
@@ -33,7 +33,7 @@ const AddCourse = () => {
       const title = prompt("Enter Chapter Name:");
       if (title) {
         const newChapter = {
-          chapterId: uniqid(),
+          chapterId: uuidv4(),
           chapterTitle: title,
           chapterContent: [],
           collapsed: false,
@@ -67,7 +67,7 @@ const AddCourse = () => {
               chapter.chapterContent.length > 0
                 ? chapter.chapterContent.slice(-1)[0].lectureOrder + 1
                 : 1,
-            lectureId: uniqid(),
+            lectureId: uuidv4(),
           };
           return {
             ...chapter,
